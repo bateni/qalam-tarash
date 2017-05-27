@@ -54,6 +54,11 @@ def build(args):
     return font
 
 
+def make_dir_p(directory):
+    if not os.path.isdir(directory):
+        os.makedirs(directory) 
+
+
 def main():
     parser = argparse.ArgumentParser(description="Build Sahel fonts.")
     parser.add_argument("--arabic-file", metavar="FILE", help="input arabic font to process", required=True)
@@ -66,6 +71,7 @@ def main():
     args = parser.parse_args()
 
     font = build(args)
+    make_dir_p(os.path.dirname(args.out_file))
     font.generate(args.out_file)
 
 if __name__ == "__main__":
