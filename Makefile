@@ -43,6 +43,10 @@ WEOT  = $(FONTS:%=$(WEBDIR)/%.eot)
 CSS   = $(WEBDIR)/$(NAME).css
 DOCS  = $(DOCDIR)/sample.pdf $(DOCDIR)/table.pdf
 
+## Comment the second line to see the build errors
+SUPPRESS = 
+SUPPRESS = 2> /dev/null
+
 all: otf doc
 .PHONY: all
 
@@ -55,7 +59,7 @@ SHELL=/usr/bin/env bash
 ## Plain build of the font without mixing in the Latin digits
 $(DISTDIR)/%-WOL.otf $(DISTDIR)/%-WOL.ttf: $(SRCDIR)/%.$(SFD) $(BUILD)
 	@echo  GEN   $@
-	@$(PY) $(BUILD) --arabic-file=$< --out-file=$@
+	@$(PY) $(BUILD) --arabic-file=$< --out-file=$@ $(SUPPRESS)
 
 ## Merge Latin chars into the font
 $(DISTDIR)/%.otf $(DISTDIR)/%.ttf: $(SRCDIR)/%.$(SFD) $(BUILD) $(LATDEP)
@@ -65,7 +69,8 @@ $(DISTDIR)/%.otf $(DISTDIR)/%.ttf: $(SRCDIR)/%.$(SFD) $(BUILD) $(LATDEP)
 	print ''.join([y for x, y in zip(a.split(), b.split()) \
 	if x == '$(notdir $(basename $@)' ]))"`; \
 	$(PY) $(BUILD) --arabic-file=$< --out-file=$@ \
-	--latin-file=$(LATDIR)/$(LATIN)-$$LATW.ttf --merge-type plain
+	--latin-file=$(LATDIR)/$(LATIN)-$$LATW.ttf \
+	--merge-type plain $(SUPPRESS)
 
 ## Merge Latin chars into the font and convert Latin digits to Farsi
 $(DISTDIR)/%-FD.otf $(DISTDIR)/%-FD.ttf: $(SRCDIR)/%.$(SFD) $(BUILD) $(FDFEA) $(LATDEP)
@@ -76,7 +81,7 @@ $(DISTDIR)/%-FD.otf $(DISTDIR)/%-FD.ttf: $(SRCDIR)/%.$(SFD) $(BUILD) $(FDFEA) $(
 	if x == '$(subst -FD,,$(notdir $(basename $@)' ])))"`; \
 	$(PY) $(BUILD) --arabic-file=$< --out-file=$@ \
 	--latin-file=$(LATDIR)/$(LATIN)-$$LATW.ttf --merge-type plain \
-	--digits-feature-file=$(FDFEA)
+	--digits-feature-file=$(FDFEA) $(SUPPRESS)
 
 ## Sample text typeset via this font
 ## WARNING: Font name and weights are encoded in the TeX file in RESDIR
@@ -89,7 +94,7 @@ $(DOCDIR)/sample.pdf: $(RESDIR)/sample.tex otf
 ## A table of all characters defined in the font
 $(DOCDIR)/table.pdf: otf $(MAKETAB)
 	@echo GEN    $@
-	@$(PY) $(MAKETAB) --font $(DISTDIR)/$(NAME).otf > $(DOCDIR)/table.tex
+	@$(PY) $(MAKETAB) --font $(DISTDIR)/$(NAME).otf > $(DOCDIR)/table.tex $(SUPPRESS)
 	@xelatex -output-directory=$(DOCDIR) --interaction=batchmode $(DOCDIR)/table.tex &> /dev/null
 	@-rm -f $(basename $@).log $(basename $@).aux $(basename $@).tex
 
