@@ -39,3 +39,5 @@ $(DISTDIR)/%-WOL.otf $(DISTDIR)/%-WOL.ttf: $(SRCDIR)/%.$(SFD) $(BUILD)
 	@echo  GEN   $@
 	@$(PY) $(BUILD) --arabic-file=$< --out-file=$@
 
+clean:
+	@-rm -fr $(DISTDIR)
