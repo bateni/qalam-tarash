@@ -24,6 +24,7 @@ SFD = sfd
 PY ?= python
 
 BUILD   = $(TOOLDIR)/build.py
+MAKETAB = $(TOOLDIR)/maketextable.py
 
 LATDEP = $(LATDIR)/$(LATIN)-$(word 1,$(LATINWEIGHTS)).ttf
 FDFEA  = $(RESDIR)/digits.fea
@@ -32,7 +33,7 @@ WLOTF = $(FONTS:%=$(DISTDIR)/%-WOL.otf)
 OTF   = $(FONTS:%=$(DISTDIR)/%.otf)
 FDOTF = $(FONTS:%=$(DISTDIR)/%-FD.otf)
 
-DOCS  = $(DOCDIR)/sample.pdf
+DOCS  = $(DOCDIR)/sample.pdf $(DOCDIR)/table.pdf
 
 all: otf doc
 .PHONY: all
@@ -75,6 +76,13 @@ $(DOCDIR)/sample.pdf: $(RESDIR)/sample.tex otf
 	@-mkdir -p $(DOCDIR)
 	@xetex -output-directory=$(DOCDIR) --interaction=batchmode $< &> /dev/null
 	@-rm -f $(basename $@).log
+
+## A table of all characters defined in the font
+$(DOCDIR)/table.pdf: otf $(MAKETAB)
+	@echo GEN    $@
+	@$(PY) $(MAKETAB) --font $(DISTDIR)/$(NAME).otf > $(DOCDIR)/table.tex
+	@xelatex -output-directory=$(DOCDIR) --interaction=batchmode $(DOCDIR)/table.tex &> /dev/null
+	@-rm -f $(basename $@).log $(basename $@).aux $(basename $@).tex
 
 clean:
 	@-rm -fr $(DISTDIR) $(DOCDIR)
