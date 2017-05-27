@@ -27,7 +27,7 @@ PY ?= python
 BUILD   = $(TOOLDIR)/build.py
 MAKETAB = $(TOOLDIR)/maketextable.py
 MAKEWEB = $(TOOLDIR)/makeweb.py
-
+MAKECSS = $(TOOLDIR)/makecss.py
 
 LATDEP = $(LATDIR)/$(LATIN)-$(word 1,$(LATINWEIGHTS)).ttf
 FDFEA  = $(RESDIR)/digits.fea
@@ -40,14 +40,14 @@ WTTF  = $(FONTS:%=$(WEBDIR)/%.ttf)
 WOFF  = $(FONTS:%=$(WEBDIR)/%.woff)
 WOF2  = $(FONTS:%=$(WEBDIR)/%.woff2)
 WEOT  = $(FONTS:%=$(WEBDIR)/%.eot)
-
+CSS   = $(WEBDIR)/$(NAME).css
 DOCS  = $(DOCDIR)/sample.pdf $(DOCDIR)/table.pdf
 
 all: otf doc
 .PHONY: all
 
 otf: $(WLOTF) $(OTF) $(FDOTF)
-web: $(WTTF) $(WOFF) $(WOF2) $(WEOT)
+web: $(WTTF) $(WOFF) $(WOF2) $(WEOT) $(CSS)
 doc: $(DOCS)
 
 SHELL=/usr/bin/env bash
@@ -101,9 +101,15 @@ $(WEBDIR)/%.ttf $(WEBDIR)/%.woff $(WEBDIR)/%.woff2: $(DISTDIR)/%.ttf $(MAKEWEB)
 
 ## Generate the EOT webfont via ttf2eot
 $(WEBDIR)/%.eot: $(DISTDIR)/%.ttf $(MAKEWEB)
-	@echo "   WEBE  $*"
+	@echo "   EOT   $*"
 	@mkdir -p $(WEBDIR)
 	@ttf2eot $< > $@
+
+## CSS file for webfonts
+$(WEBDIR)/%.css: $(WTTF) $(MAKECSS)
+	@echo "   GEN   $@"
+	@mkdir -p $(WEBDIR)
+	@$(PY) $(MAKECSS) --css=$@ --fonts="$(WTTF)"
 
 clean:
 	@-rm -fr $(DISTDIR) $(DOCDIR) $(WEBDIR)
