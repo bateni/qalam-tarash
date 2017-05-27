@@ -26,11 +26,12 @@ BUILD   = $(TOOLDIR)/build.py
 LATDEP = $(LATDIR)/$(LATIN)-$(word 1,$(LATINWEIGHTS)).ttf
 
 WLOTF = $(FONTS:%=$(DISTDIR)/%-WOL.otf)
+OTF   = $(FONTS:%=$(DISTDIR)/%.otf)
 
 all: otf
 .PHONY: all
 
-otf: $(WLOTF)
+otf: $(WLOTF) $(OTF)
 
 SHELL=/usr/bin/env bash
 
@@ -38,6 +39,16 @@ SHELL=/usr/bin/env bash
 $(DISTDIR)/%-WOL.otf $(DISTDIR)/%-WOL.ttf: $(SRCDIR)/%.$(SFD) $(BUILD)
 	@echo  GEN   $@
 	@$(PY) $(BUILD) --arabic-file=$< --out-file=$@
+
+## Merge Latin chars into the font
+$(DISTDIR)/%.otf $(DISTDIR)/%.ttf: $(SRCDIR)/%.$(SFD) $(BUILD) $(LATDEP)
+	@echo  GEN   $@
+	@export LATW=`$(PY) -c "a='$(FONTS)'; \
+	b='$(LATINWEIGHTS)'; \
+	print ''.join([y for x, y in zip(a.split(), b.split()) \
+	if x == '$(notdir $(basename $@)' ]))"`; \
+	$(PY) $(BUILD) --arabic-file=$< --out-file=$@ \
+	--latin-file=$(LATDIR)/$(LATIN)-$$LATW.ttf --merge-type plain
 
 clean:
 	@-rm -fr $(DISTDIR)
