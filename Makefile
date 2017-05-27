@@ -18,6 +18,7 @@ LATDIR  = source/latin
 DISTDIR = out/fonts
 TOOLDIR = tools
 RESDIR  = res
+DOCDIR  = out/doc
 
 SFD = sfd
 PY ?= python
@@ -31,10 +32,13 @@ WLOTF = $(FONTS:%=$(DISTDIR)/%-WOL.otf)
 OTF   = $(FONTS:%=$(DISTDIR)/%.otf)
 FDOTF = $(FONTS:%=$(DISTDIR)/%-FD.otf)
 
-all: otf
+DOCS  = $(DOCDIR)/sample.pdf
+
+all: otf doc
 .PHONY: all
 
 otf: $(WLOTF) $(OTF) $(FDOTF)
+doc: $(DOCS)
 
 SHELL=/usr/bin/env bash
 
@@ -64,5 +68,13 @@ $(DISTDIR)/%-FD.otf $(DISTDIR)/%-FD.ttf: $(SRCDIR)/%.$(SFD) $(BUILD) $(FDFEA) $(
 	--latin-file=$(LATDIR)/$(LATIN)-$$LATW.ttf --merge-type plain \
 	--digits-feature-file=$(FDFEA)
 
+## Sample text typeset via this font
+## WARNING: Font name and weights are encoded in the TeX file in RESDIR
+$(DOCDIR)/sample.pdf: $(RESDIR)/sample.tex otf
+	@echo  GEN   $@
+	@-mkdir -p $(DOCDIR)
+	@xetex -output-directory=$(DOCDIR) --interaction=batchmode $< &> /dev/null
+	@-rm -f $(basename $@).log
+
 clean:
-	@-rm -fr $(DISTDIR)
+	@-rm -fr $(DISTDIR) $(DOCDIR)

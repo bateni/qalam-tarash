@@ -1,0 +1,57 @@
+%% Run with XeTex from root of repository:
+%% xetex sample.tex
+\def\FontPath{out/fonts/}
+\def\FontName{Sahel}
+%
+\def\TextOne{«کلاغِ فرزِ چابک، ظهرِ هر روز با صدای ضخیم و عذاب‌آورش}
+\def\TextTwo{بـه جستجوی یک مثقال گنجِ پنهان در حیاط رژه می‌رفت»}
+\def\TextThree{The quick brown fox jumped over the lazy dog.}
+%
+\def\NumOne{ارقام فارسی: ۱۲۳۴۵۶۷۸۹۰}
+\def\NumTwo{ارقام لاتین: 1234567890}
+\def\NormalF{عادی - }
+\def\DigitsF{مبدّل - }
+%
+\nopagenumbers
+\TeXXeTstate=1
+%
+\def\sample#1#2{%
+  \font\test="[\FontPath\FontName#1.otf]" at #2pt%
+  \centerline{\beginR\test\TextOne\endR}
+  \centerline{\beginR\test\TextTwo\endR}
+  \centerline{\beginL\test\TextThree\endL}
+  \medskip
+}
+%
+\def\sampleNum#1#2{%
+  \font\test="[\FontPath\FontName#1.otf]" at #2pt%
+  \centerline{\beginR\test\NormalF\NumOne\endR}
+  \centerline{\beginR\test\NormalF\NumTwo\endR}
+  \smallskip
+  \font\test="[\FontPath\FontName#1-FD.otf]" at #2pt%
+  \centerline{\beginR\test\DigitsF\NumOne\endR}
+  \centerline{\beginR\test\DigitsF\NumTwo\endR}
+  \medskip
+}
+%
+\def\SampleAtSize#1{%
+  \sample{}{#1}
+  \sample{-Bold}{#1}
+  \sample{-Black}{#1}
+}
+%
+\def\SampleNumAtSize#1{%
+  \sampleNum{}{#1}
+  \sampleNum{-Bold}{#1}
+  \sampleNum{-Black}{#1}
+}
+%
+\SampleAtSize{20}
+\vskip1cm
+\SampleAtSize{12}
+\vskip1cm
+\SampleAtSize{8}
+%
+\vfil \break
+\SampleNumAtSize{20}
+\bye
