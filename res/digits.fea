@@ -1,0 +1,18 @@
+languagesystem DFLT dflt;
+
+lookup LatinToFarsiDigits {
+  sub zero  by \uni06F0 ;
+  sub one   by \uni06F1 ;
+  sub two   by \uni06F2 ;
+  sub three by \uni06F3 ;
+  sub four  by \uni06F4 ;
+  sub five  by \uni06F5 ;
+  sub six   by \uni06F6 ;
+  sub seven by \uni06F7 ;
+  sub eight by \uni06F8 ;
+  sub nine  by \uni06F9 ;
+} LatinToFarsiDigits;
+
+feature ccmp {
+  lookup LatinToFarsiDigits;
+} ccmp;

@@ -17,6 +17,7 @@ SRCDIR  = source/farsi
 LATDIR  = source/latin
 DISTDIR = out/fonts
 TOOLDIR = tools
+RESDIR  = res
 
 SFD = sfd
 PY ?= python
@@ -24,14 +25,16 @@ PY ?= python
 BUILD   = $(TOOLDIR)/build.py
 
 LATDEP = $(LATDIR)/$(LATIN)-$(word 1,$(LATINWEIGHTS)).ttf
+FDFEA  = $(RESDIR)/digits.fea
 
 WLOTF = $(FONTS:%=$(DISTDIR)/%-WOL.otf)
 OTF   = $(FONTS:%=$(DISTDIR)/%.otf)
+FDOTF = $(FONTS:%=$(DISTDIR)/%-FD.otf)
 
 all: otf
 .PHONY: all
 
-otf: $(WLOTF) $(OTF)
+otf: $(WLOTF) $(OTF) $(FDOTF)
 
 SHELL=/usr/bin/env bash
 
@@ -49,6 +52,17 @@ $(DISTDIR)/%.otf $(DISTDIR)/%.ttf: $(SRCDIR)/%.$(SFD) $(BUILD) $(LATDEP)
 	if x == '$(notdir $(basename $@)' ]))"`; \
 	$(PY) $(BUILD) --arabic-file=$< --out-file=$@ \
 	--latin-file=$(LATDIR)/$(LATIN)-$$LATW.ttf --merge-type plain
+
+## Merge Latin chars into the font and convert Latin digits to Farsi
+$(DISTDIR)/%-FD.otf $(DISTDIR)/%-FD.ttf: $(SRCDIR)/%.$(SFD) $(BUILD) $(FDFEA) $(LATDEP)
+	@echo  GEN   $@
+	@export LATW=`$(PY) -c "a='$(FONTS)'; \
+	b='$(LATINWEIGHTS)'; \
+	print ''.join([y for x, y in zip(a.split(), b.split()) \
+	if x == '$(subst -FD,,$(notdir $(basename $@)' ])))"`; \
+	$(PY) $(BUILD) --arabic-file=$< --out-file=$@ \
+	--latin-file=$(LATDIR)/$(LATIN)-$$LATW.ttf --merge-type plain \
+	--digits-feature-file=$(FDFEA)
 
 clean:
 	@-rm -fr $(DISTDIR)
