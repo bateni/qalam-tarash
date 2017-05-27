@@ -15,23 +15,31 @@ LATINWEIGHTS = Regular Bold ExtraBold
 ## Directories
 SRCDIR  = source/farsi
 LATDIR  = source/latin
-DISTDIR = out/fonts
 TOOLDIR = tools
 RESDIR  = res
+DISTDIR = out/fonts
 DOCDIR  = out/doc
+WEBDIR  = out/webfonts
 
 SFD = sfd
 PY ?= python
 
 BUILD   = $(TOOLDIR)/build.py
 MAKETAB = $(TOOLDIR)/maketextable.py
+MAKEWEB = $(TOOLDIR)/makeweb.py
+
 
 LATDEP = $(LATDIR)/$(LATIN)-$(word 1,$(LATINWEIGHTS)).ttf
 FDFEA  = $(RESDIR)/digits.fea
 
-WLOTF = $(FONTS:%=$(DISTDIR)/%-WOL.otf)
 OTF   = $(FONTS:%=$(DISTDIR)/%.otf)
+WLOTF = $(FONTS:%=$(DISTDIR)/%-WOL.otf)
 FDOTF = $(FONTS:%=$(DISTDIR)/%-FD.otf)
+
+WTTF  = $(FONTS:%=$(WEBDIR)/%.ttf)
+WOFF  = $(FONTS:%=$(WEBDIR)/%.woff)
+WOF2  = $(FONTS:%=$(WEBDIR)/%.woff2)
+WEOT  = $(FONTS:%=$(WEBDIR)/%.eot)
 
 DOCS  = $(DOCDIR)/sample.pdf $(DOCDIR)/table.pdf
 
@@ -39,6 +47,7 @@ all: otf doc
 .PHONY: all
 
 otf: $(WLOTF) $(OTF) $(FDOTF)
+web: $(WTTF) $(WOFF) $(WOF2) $(WEOT)
 doc: $(DOCS)
 
 SHELL=/usr/bin/env bash
@@ -84,5 +93,17 @@ $(DOCDIR)/table.pdf: otf $(MAKETAB)
 	@xelatex -output-directory=$(DOCDIR) --interaction=batchmode $(DOCDIR)/table.tex &> /dev/null
 	@-rm -f $(basename $@).log $(basename $@).aux $(basename $@).tex
 
+## Three flavors (ttf, woff, woff2) are created at once
+$(WEBDIR)/%.ttf $(WEBDIR)/%.woff $(WEBDIR)/%.woff2: $(DISTDIR)/%.ttf $(MAKEWEB)
+	@echo "   WEB   $*"
+	@mkdir -p $(WEBDIR)
+	@$(PY) $(MAKEWEB) $< $(WEBDIR)
+
+## Generate the EOT webfont via ttf2eot
+$(WEBDIR)/%.eot: $(DISTDIR)/%.ttf $(MAKEWEB)
+	@echo "   WEBE  $*"
+	@mkdir -p $(WEBDIR)
+	@ttf2eot $< > $@
+
 clean:
-	@-rm -fr $(DISTDIR) $(DOCDIR)
+	@-rm -fr $(DISTDIR) $(DOCDIR) $(WEBDIR)
